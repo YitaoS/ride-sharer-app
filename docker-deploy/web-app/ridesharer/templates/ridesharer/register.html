@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ridesharer register</title>
+    <link href="{% static 'css/login.css' %}" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+      <div class="container">
+        <a href="#" class="navbar-brand">Ridesharer Register</a>
+        <div class="collapse navbar-collapse" id="navmenu">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <div class="nav-link">Join and start your ride!</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <section class="vh-150 gradient-custom">
+      <div class="container py-5 h-100">
+        <div class="d-flex justify-content-center align-items-center h-150">
+          <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+            <div class="card bg-dark text-white" style="border-radius: 1rem">
+              <div class="card-body p-5 text-center">
+                <form method="POST" action="">
+                  {% csrf_token%}
+                  <div class="mb-md-3 mt-md-4 pb-5">
+                    <h2 class="fw-bold mb-4 text-uppercase">Register</h2>
+                    <div class="form-white mb-2">
+                      <label class="form-label" for="typeNameX">Name</label>
+                      <br />
+                      <input
+                        type="text"
+                        name="username"
+                        maxlength="150"
+                        autofocus=""
+                        required=""
+                        id="id_username"
+                        class="form-control-lg"
+                      />
+                    </div>
+
+                    <div class="form-white mb-2">
+                      <label class="form-label" for="typeEmailX">Email</label>
+                      <br />
+                      <input
+                        type="email"
+                        name="email"
+                        maxlength="254"
+                        id="id_email"
+                        class="form-control-lg"
+                      />
+                    </div>
+
+                    <div class="form-white mb-2">
+                      <label class="form-label" for="typePasswordX"
+                        >Password</label
+                      >
+                      <br />
+                      <input
+                        type="password"
+                        name="password1"
+                        autocomplete="new-password"
+                        required=""
+                        id="id_password1"
+                        class="form-control-lg"
+                      />
+                    </div>
+
+                    <div class="form-white mb-2">
+                      <label class="form-label" for="typePasswordX"
+                        >Password again</label
+                      >
+                    </div>
+                    <input
+                      type="password"
+                      name="password2"
+                      autocomplete="new-password"
+                      required=""
+                      id="id_password2"
+                      class="form-control-lg"
+                    />
+                    <br />
+                    <button
+                      class="btn btn-outline-light btn-lg px-5"
+                      type="submit"
+                      name="Create User"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                  {{form.errors}}
+                </form>
+
+                <div>
+                  <p class="mb-0">
+                    Already have an account?
+                    <a
+                      href="{% url 'ridesharer:user_login' %}"
+                      class="text-white-50 fw-bold"
+                      >Login</a
+                    >
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
