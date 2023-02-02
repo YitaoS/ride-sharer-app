@@ -31,7 +31,7 @@ class updateVehicleForm(forms.ModelForm):
         model = Vehicle
         fields = ['vehicle_type','license_number','max_capacity','special_info']
 
-class updateRideForm(forms.ModelForm):
+class updateRideForm(forms.ModelForm):    
     destination = forms.CharField(max_length=100)    
     require_arrival_time = forms.DateTimeField(help_text='Format: 2022-01-01 12:00')
     require_vehicle_type = forms.CharField(

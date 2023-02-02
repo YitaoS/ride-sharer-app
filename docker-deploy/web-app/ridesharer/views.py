@@ -24,6 +24,7 @@ def user_register(request):
             username = form.cleaned_data.get('username')
             messages.success(request,"Account was create for  "+username)
             return HttpResponseRedirect('login')
+        messages.success(request,"Invalid email address!")
     return render(request, 'ridesharer/register.html')
 
 def user_login(request):
@@ -86,25 +87,27 @@ class ride_create(CreateView):
     def form_valid(self, form):
         form.instance.owner= self.request.user
         form.instance.driver= "To be assigned"
-        form.instance.create_time = timezone.now()
         form.instance.ride_status = RideStatus.OPEN
         return super().form_valid(form)
 
 @login_required(login_url='ridesharer:user_login')
 def ride_detail(request, ride_id):
     if request.method == 'POST':
-        form = updateVehicleForm(request.POST, instance = request.user.vehicle)
+        form = updateRideForm(request.POST, instance = Ride.objects.filter(id=ride_id)[0])
         if form.is_valid():
             form.save()
-            messages.success(request,"Vehicle status has been updated !")
-            return HttpResponseRedirect('vehicle_info')
+            messages.success(request,"Ride status has been updated !")
+            context = {'form':form}
+            render(request, 'ridesharer/ride_modify.html',context)
         else:
-            messages.warning(request,"Capacity should be positive !")
+            messages.warning(request,"Invalid input !")
     ride = Ride.objects.filter(id=ride_id)[0]
-    form = updateRideForm(instance = ride)
-    context ={'form':form}
-    if ride.ride_status == RideStatus.OPEN:
+   
+    if ride.ride_status == RideStatus.OPEN: 
+        form = updateRideForm(instance = ride)
+        context ={'form':form}
         return render(request, 'ridesharer/ride_modify.html',context)
+    context ={'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'total_passengers':ride.total_passengers,'require_vehicle_type':ride.get_require_vehicle_type_display(),'allow_sharer':ride.allow_sharer,'special_info':ride.special_info}
     return  render(request, 'ridesharer/ride_detail.html',context)
 
 # def user_update(request):

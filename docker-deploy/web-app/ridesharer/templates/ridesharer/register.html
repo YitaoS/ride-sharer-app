@@ -100,7 +100,10 @@
                       Submit
                     </button>
                   </div>
-                  {{form.errors}}
+                  {{form.errors}} <br />
+                  {% for message in messages%}
+                  <p id="messages">{{message}}</p>
+                  {% endfor %}
                 </form>
 
                 <div>

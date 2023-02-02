@@ -35,14 +35,14 @@ class Ride(models.Model):
     driver = models.CharField(max_length=200)
     require_arrival_time = models.DateTimeField('arrival time',help_text='eg.2077-01-01 12:00')
     require_vehicle_type = models.CharField(max_length=1, choices=VehicleType.choices, default=VehicleType.NORMALCAR, blank=True)
-    create_time = models.DateTimeField('ride created date')
+    create_time = models.DateTimeField('ride created date',null=True, blank=True)
     destination = models.CharField(max_length=200)
     total_passengers = models.PositiveIntegerField()
     allow_sharer = models.BooleanField(default=False)
     special_info = models.CharField('special requirement',max_length=200,blank=True)
     ride_status= models.CharField(max_length=1, choices=RideStatus.choices, default=RideStatus.OPEN)
     def get_absolute_url(self):
-        return reverse('ridesharer:user_home')
+        return reverse('ridesharer:ride_list')
     def __str__(self):
-        return "Arrival time: " + str(self.require_arrival_time) + " dest: " + self.destination + " status: " + self.ride_status
+        return "Arrival time: " + str(self.require_arrival_time) + " dest: " + self.destination + " status: " + self.get_ride_status_display()
 
