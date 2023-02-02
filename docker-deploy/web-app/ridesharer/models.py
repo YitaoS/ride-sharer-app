@@ -24,24 +24,25 @@ class Vehicle(models.Model):
     def get_absolute_url(self):
         return reverse('ridesharer:vehicle_info')
 
+class RideStatus(models.TextChoices):
+    OPEN = 'O', 'open'
+    CONFIRMED = 'C', 'confirmed'
+    FINISH = 'F', 'finish'
+
 class Ride(models.Model):
     id = models.AutoField(primary_key = True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE,primary_key=False, related_name='ride')
     driver = models.CharField(max_length=200)
-    require_arrival_time = models.DateTimeField('arrival time',help_text='Format: 2022-01-01 12:00')
+    require_arrival_time = models.DateTimeField('arrival time',help_text='eg.2077-01-01 12:00')
     require_vehicle_type = models.CharField(max_length=1, choices=VehicleType.choices, default=VehicleType.NORMALCAR, blank=True)
     create_time = models.DateTimeField('ride created date')
     destination = models.CharField(max_length=200)
     total_passengers = models.PositiveIntegerField()
     allow_sharer = models.BooleanField(default=False)
     special_info = models.CharField('special requirement',max_length=200,blank=True)
-    class RideStatus(models.TextChoices):
-        OPEN = 'O', 'open'
-        CONFIRMED = 'C', 'confirmed'
-        FINISH = 'F', 'finish'
-
     ride_status= models.CharField(max_length=1, choices=RideStatus.choices, default=RideStatus.OPEN)
     def get_absolute_url(self):
-        return reverse('ridesharer:vehicle_info')
+        return reverse('ridesharer:user_home')
     def __str__(self):
-        return "owner: " + self.owner.username + " dest: " + self.destination + " total: " + total_passengers
+        return "Arrival time: " + str(self.require_arrival_time) + " dest: " + self.destination + " status: " + self.ride_status
+

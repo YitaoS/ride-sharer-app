@@ -13,5 +13,7 @@ urlpatterns = [
     path('vehicle_info', views.vehicle_update, name='vehicle_info'),
     path('vehicle_delete', views.vehicle_delete, name='vehicle_delete'),
     path('user_info', views.user_update, name='user_update'),
-    path('ride_create', login_required(views.ride_create.as_view()), name='ride_create')
+    path('ride_create', login_required(views.ride_create.as_view()), name='ride_create'),
+    path('ride_list',  views.ride_list, name='ride_list'),
+    path('<int:ride_id>/', views.ride_detail, name='ride_detail'),
 ]

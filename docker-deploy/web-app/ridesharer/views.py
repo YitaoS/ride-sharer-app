@@ -90,6 +90,44 @@ class ride_create(CreateView):
         form.instance.ride_status = RideStatus.OPEN
         return super().form_valid(form)
 
+@login_required(login_url='ridesharer:user_login')
+def ride_detail(request, ride_id):
+    if request.method == 'POST':
+        form = updateVehicleForm(request.POST, instance = request.user.vehicle)
+        if form.is_valid():
+            form.save()
+            messages.success(request,"Vehicle status has been updated !")
+            return HttpResponseRedirect('vehicle_info')
+        else:
+            messages.warning(request,"Capacity should be positive !")
+    ride = Ride.objects.filter(id=ride_id)[0]
+    form = updateRideForm(instance = ride)
+    context ={'form':form}
+    if ride.ride_status == RideStatus.OPEN:
+        return render(request, 'ridesharer/ride_modify.html',context)
+    return  render(request, 'ridesharer/ride_detail.html',context)
+
+# def user_update(request):
+#     if request.method == 'POST':
+#         form = updateUserForm(request.POST, instance = request.user)
+#         if form.is_valid():
+#             form.save()
+#             email = form.cleaned_data.get('email')
+#             messages.success(request,"email changed to "+ email)
+#             return HttpResponseRedirect('user_info')
+#     form = updateUserForm(instance = request.user)
+#     name = request.user.username
+#     context = {'form':form,'name':name}
+#     return  render(request, 'ridesharer/user_info.html',context)
+
+@login_required(login_url='ridesharer:user_login')
+def ride_list(request):
+    allRides = request.user.ride.all()
+    rides = allRides.filter().exclude(ride_status=RideStatus.FINISH)
+    context = {
+        'rides': rides,
+    }
+    return render(request, 'ridesharer/ride_info.html', context)
 
 ##to do
 """ @login_re quired(login_url='ridesharer:user_login')

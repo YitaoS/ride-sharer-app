@@ -17,7 +17,7 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
       <div class="container">
-        <a href="#" class="navbar-brand">Hello, {{name}}!</a>
+        <a href="#" class="navbar-brand">Order Ride</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -26,18 +26,12 @@
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="navmenu">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
               <a href="{% url 'ridesharer:user_home' %}" class="nav-link"
                 >home</a
               >
-            </li>
-            <li class="nav-item">
-              <a href="{% url 'ridesharer:ride_list' %}" class="nav-link"
-                >your rides
-              </a>
             </li>
             <li class="nav-item">
               <a href="{% url 'ridesharer:user_update' %}" class="nav-link"
@@ -63,17 +57,62 @@
         <div class="d-flex justify-content-center align-items-center h-150">
           <div class="col-12 col-md-8 col-lg-6 col-xl-5">
             <div class="card bg-dark text-white" style="border-radius: 1rem">
-              <div class="card-body p-5 text-center">
+              <div class="card-body p-5 text-left">
                 <form method="POST" action="">
                   {% csrf_token%}
                   <div class="mb-md-3 mt-md-4 pb-5">
-                    <a
-                      href="{% url 'ridesharer:ride_create' %}"
-                      class="navbar-brand nav-link"
-                      style="font-size: 50px"
+                    <h2 class="fw-bold mb-4 text-uppercase">Order your ride</h2>
+                    <br />
+
+                    {{ form.as_p}}
+                    <!-- <div class="form-white mb-2">
+                        <label class="form-label" for="typeNameX"></label>
+                        <br />
+                        <input
+                          type="text"
+                          name="username"
+                          maxlength="150"
+                          autofocus=""
+                          required=""
+                          id="id_username"
+                          class="form-control-lg"
+                        />
+                      </div>
+  
+                      <div class="form-white mb-2">
+                        <label class="form-label" for="typeEmailX">Email</label>
+                        <br />
+                        <input
+                          type="email"
+                          name="email"
+                          maxlength="254"
+                          id="id_email"
+                          class="form-control-lg"
+                        />
+                      </div>
+  
+                      <div class="form-white mb-2">
+                        <label class="form-label" for="typePasswordX"
+                          >Password</label
+                        >
+                        <br />
+                        <input
+                          type="password"
+                          name="password1"
+                          autocomplete="new-password"
+                          required=""
+                          id="id_password1"
+                          class="form-control-lg"
+                        />
+                      </div> -->
+
+                    <button
+                      class="btn btn-outline-light btn-lg px-5"
+                      type="submit"
+                      name="Register Driver"
                     >
-                      Start Your Ride Now!
-                    </a>
+                      Submit
+                    </button>
                     {% for message in messages%}
                     <p id="messages">{{message}}</p>
                     {% endfor %}

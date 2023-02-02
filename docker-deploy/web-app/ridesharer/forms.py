@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Vehicle
+from .models import Vehicle,Ride
     
 class createUserForm(UserCreationForm):
     class Meta:
@@ -31,7 +31,7 @@ class updateVehicleForm(forms.ModelForm):
         model = Vehicle
         fields = ['vehicle_type','license_number','max_capacity','special_info']
 
-class UpdateRideForm(forms.Form):
+class updateRideForm(forms.ModelForm):
     destination = forms.CharField(max_length=100)    
     require_arrival_time = forms.DateTimeField(help_text='Format: 2022-01-01 12:00')
     require_vehicle_type = forms.CharField(
@@ -39,3 +39,6 @@ class UpdateRideForm(forms.Form):
     total_passengers = forms.IntegerField(initial=1)
     special_info = forms.CharField(max_length=400, required=False)
     allow_sharer = forms.BooleanField(initial=False, required=False)
+    class Meta:
+        model = Ride
+        fields = ['require_arrival_time','destination','total_passengers','require_vehicle_type','allow_sharer','special_info']
