@@ -24,6 +24,12 @@ class Vehicle(models.Model):
     def get_absolute_url(self):
         return reverse('ridesharer:vehicle_info')
 
+class ShareAction(models.Model):
+    id = models.AutoField(primary_key = True)
+    sharer = models.ForeignKey(User, on_delete=models.CASCADE,primary_key=False, related_name='share_actions')
+    shared_ride = models.ForeignKey(User, on_delete=models.CASCADE,primary_key=False, related_name='share_actions')
+    sharer_num = models.PositiveIntegerField(default = 1)
+
 class RideStatus(models.TextChoices):
     OPEN = 'O', 'open'
     CONFIRMED = 'C', 'confirmed'
@@ -32,17 +38,17 @@ class RideStatus(models.TextChoices):
 class Ride(models.Model):
     id = models.AutoField(primary_key = True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE,primary_key=False, related_name='ride')
-    driver = models.CharField(max_length=200)
+    driver = models.ForeignKey(User, on_delete=models.CASCADE,primary_key=False, related_name='driver_ride',null=True)
     require_arrival_time = models.DateTimeField('arrival time',help_text='eg.2077-01-01 12:00')
-    require_vehicle_type = models.CharField(max_length=1, choices=VehicleType.choices, default=VehicleType.NORMALCAR, blank=True)
+    require_vehicle_type = models.CharField(max_length=1, choices=VehicleType.choices, default='', blank=True)
     create_time = models.DateTimeField('ride created date',null=True, blank=True)
     destination = models.CharField(max_length=200)
-    total_passengers = models.PositiveIntegerField()
+    passengers = models.PositiveIntegerField()
     allow_sharer = models.BooleanField(default=False)
+    sharer = models.ManyToManyField(User, related_name='sharer_ride')
     special_info = models.CharField('special requirement',max_length=200,blank=True)
     ride_status= models.CharField(max_length=1, choices=RideStatus.choices, default=RideStatus.OPEN)
     def get_absolute_url(self):
         return reverse('ridesharer:ride_list')
     def __str__(self):
-        return "Arrival time: " + str(self.require_arrival_time) + " dest: " + self.destination + " status: " + self.get_ride_status_display()
-
+        return "Owner: "+ self.owner.username+"Arrival time: " + str(self.require_arrival_time) + " dest: " + self.destination + " status: " + self.get_ride_status_display()

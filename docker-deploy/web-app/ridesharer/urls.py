@@ -15,5 +15,10 @@ urlpatterns = [
     path('user_info', views.user_update, name='user_update'),
     path('ride_create', login_required(views.ride_create.as_view()), name='ride_create'),
     path('ride_list',  views.ride_list, name='ride_list'),
+    path('<int:ride_id>/ride_delete',  views.ride_delete, name='ride_delete'),
+    path('order_list',  views.order_list, name='order_list'),
     path('<int:ride_id>/', views.ride_detail, name='ride_detail'),
+    path('<int:ride_id>/confirm', views.ride_confirm, name='ride_confirm'),
+    path('search_rides_for_driver', views.search_rides_for_driver, name='search_rides_for_driver'),
+    path('search_rides_for_sharer', views.search_rides_for_sharer, name='search_rides_for_sharer'),
 ]

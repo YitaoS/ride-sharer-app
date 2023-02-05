@@ -17,7 +17,7 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
       <div class="container">
-        <a href="#" class="navbar-brand">Order Ride</a>
+        <a href="#" class="navbar-brand">Join Ride</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -59,68 +59,18 @@
             <div class="card bg-dark text-white" style="border-radius: 1rem">
               <div class="card-body p-5 text-left">
                 <form method="POST" action="">
-                  {% csrf_token %}
+                  {% csrf_token%}
                   <div class="mb-md-3 mt-md-4 pb-5">
                     <h2 class="fw-bold mb-4 text-uppercase">Order your ride</h2>
                     <br />
-                    {% if owner == user %}
-                    <h2>Vehicle Information</h2>
-                    <br />
-                    <p>
-                      <label for="id_driver">Driver:</label>
-                      {{driver}}
-                    </p>
-                    <p>
-                      <label for="id_vehicle_type">Vehicle type:</label>
-                      {{vehicle_type}}
-                    </p>
-                    <p>
-                      <label for="id_license_number">license number:</label>
-                      {{license_number}}
-                    </p>
-                    <p>
-                      <label for="id_max_capacity">Max capacity: </label>
-                      {{max_capacity}}
-                    </p>
-                    <p>
-                      <label for="id_driver_special_info">Special info: </label>
-                      {{driver_special_info}}
-                    </p>
-                    {% endif %}
-                    <h2>Ride Information</h2>
-                    <p>
-                      <label for="id_require_arrival_time"
-                        >Require arrival time:</label
+
+                    {% for ride in rides %}
+                    <li>
+                      <a href="{% url 'ridesharer:ride_detail' ride.id %}"
+                        >{{ ride }}</a
                       >
-                      {{require_arrival_time}}
-                    </p>
-
-                    <p>
-                      <label for="id_destination">Destination:</label>
-                      {{destination}}
-                    </p>
-
-                    <p>
-                      <label for="id_passengers">passengers:</label>
-                      {{passengers}}
-                    </p>
-
-                    <p>
-                      <label for="id_require_vehicle_type"
-                        >Require vehicle type:</label
-                      >
-                      {{require_vehicle_type}}
-                    </p>
-
-                    <p>
-                      <label for="id_allow_sharer">Allow sharer:</label>
-                      {{allow_sharer}}
-                    </p>
-
-                    <p>
-                      <label for="id_special_info">My special info:</label>
-                      {{my_special_info}}
-                    </p>
+                    </li>
+                    {% endfor %}
                     <!-- <div class="form-white mb-2">
                         <label class="form-label" for="typeNameX"></label>
                         <br />
@@ -161,15 +111,10 @@
                           class="form-control-lg"
                         />
                       </div> -->
-                    {% if driver == user%}
-                    <button
-                      class="btn btn-outline-light btn-lg px-5"
-                      type="submit"
-                      name="Finish Order"
-                    >
-                      Finish
-                    </button>
-                    {% endif %}
+
+                    {% for message in messages%}
+                    <p id="messages">{{ message }}</p>
+                    {% endfor %}
                   </div>
                 </form>
               </div>

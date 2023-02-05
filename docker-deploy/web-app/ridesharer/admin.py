@@ -15,7 +15,7 @@ class RideAdmin(admin.ModelAdmin):
         'require_vehicle_type',
         'create_time',
         'destination',
-        'total_passengers',
+        'passengers',
         'allow_sharer',
         'special_info',
         'ride_status'

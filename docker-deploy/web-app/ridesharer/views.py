@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.http import HttpResponse,HttpResponseRedirect
 from django.utils import timezone
+from django.db.models import Q
 
 from django.views.generic.edit import CreateView
 from django.contrib.auth import authenticate, login, logout
@@ -81,33 +82,62 @@ class driver_register(CreateView):
 
 class ride_create(CreateView):
     model = Ride
-    fields = [ 'require_arrival_time','destination','total_passengers','require_vehicle_type','allow_sharer','special_info']
+    fields = [ 'require_arrival_time','destination','passengers','require_vehicle_type','allow_sharer','special_info']
     template_name = 'ridesharer/ride_create.html'
 
     def form_valid(self, form):
         form.instance.owner= self.request.user
-        form.instance.driver= "To be assigned"
+        form.instance.driver= None
         form.instance.ride_status = RideStatus.OPEN
         return super().form_valid(form)
 
 @login_required(login_url='ridesharer:user_login')
+def ride_delete(request, ride_id):
+    ride = Ride.objects.filter(id=ride_id)[0] 
+    ride.delete()
+    messages.success(request,"Successfully delete ride!")
+    return HttpResponseRedirect(reverse('ridesharer:ride_list'))
+
+@login_required(login_url='ridesharer:user_login')
 def ride_detail(request, ride_id):
-    if request.method == 'POST':
-        form = updateRideForm(request.POST, instance = Ride.objects.filter(id=ride_id)[0])
-        if form.is_valid():
-            form.save()
-            messages.success(request,"Ride status has been updated !")
-            context = {'form':form}
-            render(request, 'ridesharer/ride_modify.html',context)
-        else:
-            messages.warning(request,"Invalid input !")
-    ride = Ride.objects.filter(id=ride_id)[0]
-   
-    if ride.ride_status == RideStatus.OPEN: 
+    user = request.user.username
+    ride = Ride.objects.filter(id=ride_id)[0] 
+    owner = ride.owner.username
+    require_arrival_time = ride.require_arrival_time
+    destination = ride.destination
+    passengers = ride.passengers
+    allow_sharer = ride.allow_sharer
+    require_vehicle_type = ride.get_require_vehicle_type_display()
+    if ride.ride_status != 'C':
+        #owner
+        #post
+        if request.method == 'POST':
+            form = updateRideForm(request.POST, instance = ride)
+            context = {'form':form, 'ride':ride}
+            if form.is_valid():
+                form.save()
+                messages.success(request,"Ride status has been updated !")
+                render(request, 'ridesharer/ride_modify.html',context)
+            else:
+                messages.warning(request,"Invalid input !")
+        #get
         form = updateRideForm(instance = ride)
-        context ={'form':form}
+        context ={'form':form, 'ride':ride}
         return render(request, 'ridesharer/ride_modify.html',context)
-    context ={'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'total_passengers':ride.total_passengers,'require_vehicle_type':ride.get_require_vehicle_type_display(),'allow_sharer':ride.allow_sharer,'special_info':ride.special_info}
+    if request.method == 'POST':
+        ride.ride_status = 'F'
+        ride.save()
+        rides = request.user.driver_ride.all().filter(ride_status=RideStatus.CONFIRMED)
+        context = {
+            'rides': rides,
+        }
+        return render(request, 'ridesharer/ride_info.html', context)
+    driver = ride.driver.username
+    vehicle_type = ride.driver.vehicle.vehicle_type
+    license_number = ride.driver.vehicle.license_number
+    max_capacity = ride.driver.vehicle.max_capacity
+    special_info = ride.driver.vehicle.special_info
+    context ={'owner':owner,'driver':driver,'require_arrival_time':require_arrival_time,'destination':destination,'passengers':passengers,'require_vehicle_type':require_vehicle_type,'allow_sharer':allow_sharer,'my_special_info':ride.special_info,'vehicle_type': vehicle_type,'license_number': license_number,'max_capacity': max_capacity,'driver_special_info': special_info, 'user':user}
     return  render(request, 'ridesharer/ride_detail.html',context)
 
 # def user_update(request):
@@ -132,20 +162,19 @@ def ride_list(request):
     }
     return render(request, 'ridesharer/ride_info.html', context)
 
-##to do
-""" @login_re quired(login_url='ridesharer:user_login')
-def ride_update(request):
-    if request.method == 'POST':
-        form = cre(request.POST, instance = request.user.vehicle)
-        if form.is_valid():
-            form.save()
-            messages.success(request,"Vehicle status has been updated !")
-            return HttpResponseRedirect('vehicle_info')
-        else:
-            messages.warning(request,"Capacity should be positive !")
-    form = updateVehicleForm(instance = request.user.vehicle)
-    context ={'form':form}
-    return  render(request, 'ridesharer/vehicle_info.html',context) """
+def order_list(request):
+    try: 
+        request.user.vehicle
+        allRides = request.user.driver_ride.all()
+        rides = allRides.filter(ride_status=RideStatus.CONFIRMED)
+        context = {
+            'rides': rides,
+        }
+        return render(request, 'ridesharer/ride_info.html', context)
+    except AttributeError:
+        messages.info(request,"You haven't register as a driver !")
+        return HttpResponseRedirect('driver_register')
+
 ###############
 ###driver stuff
 ###############
@@ -165,13 +194,82 @@ def vehicle_update(request):
         return  render(request, 'ridesharer/vehicle_info.html',context)
     except AttributeError:
         messages.info(request,"You haven't register as a driver !")
-        return HttpResponseRedirect('driver_register')
+        return HttpResponseRedirect('driver_register')    
 
 @login_required(login_url='ridesharer:user_login')
 def vehicle_delete(request):
-    my_vehicle = request.user.vehicle
-    my_vehicle.delete()
-    messages.success(request,"Successfully remove vehicle infomation!")
-    return HttpResponseRedirect('driver_register')
+    ride = Ride.objects.filter(driver=request.user,ride_status='C')
+    if ride:
+        messages.warning(request,"You still have ride order to complete!")
+        return HttpResponseRedirect(reverse('ridesharer:vehicle_info'))
+    else:
+        my_vehicle = request.user.vehicle
+        my_vehicle.delete()
+        messages.success(request,"Successfully remove vehicle infomation!")
+        return HttpResponseRedirect('driver_register')
 
+@login_required(login_url='ridesharer:user_login')
+def ride_confirm(request,ride_id):
+    ride = Ride.objects.filter(id=ride_id)[0]
+    if request.method == 'POST':
+        ride.driver = request.user
+        ride.ride_status = 'C'
+        ride.save()
+        pass
+    if ride.driver == None:
+        driver = "To be assigned"
+    else:
+        driver = ride.driver.username
+    context ={'driver':driver,'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'passengers':ride.passengers,'require_vehicle_type':ride.get_require_vehicle_type_display(),'allow_sharer':ride.allow_sharer,'special_info':ride.special_info,'ride_status':ride.get_ride_status_display()}
+    return  render(request, 'ridesharer/ride_confirm.html',context)
 
+@login_required(login_url='ridesharer:user_login')
+def confirm_join(request,ride_id,passengers,passengers_num):
+    ride = Ride.objects.filter(id=ride_id)[0]
+    if request.method == 'POST':
+        ride.sharer.add(request.user)
+        ride.passengers += passengers_num
+        ride.save()
+        pass
+    driver = "To be assigned"
+    context ={'driver':driver,'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'passengers':ride.passengers,'require_vehicle_type':ride.get_require_vehicle_type_display(),'allow_sharer':ride.allow_sharer,'special_info':ride.special_info,'ride_status':ride.get_ride_status_display()}
+    return  render(request, 'ridesharer/ride_confirm.html',context)
+
+@login_required(login_url='ridesharer:user_login')
+def search_rides_for_driver(request):
+    try:        
+        vehicle_profile = request.user.vehicle# access all available open rides for driver
+        rides = Ride.objects.filter(Q(passengers__lte=vehicle_profile.max_capacity)& ~Q(owner = request.user)& Q(ride_status = RideStatus.OPEN)& (Q(require_vehicle_type=vehicle_profile.vehicle_type) | Q(require_vehicle_type=''))& (Q(special_info=vehicle_profile.special_info)| Q(special_info='')))
+        context = {'rides':rides}
+        return render(request, 'ridesharer/driver_ride_search.html', context)
+    except AttributeError:
+        messages.info(request,"You haven't register as a driver !")
+        return HttpResponseRedirect('driver_register')
+
+@login_required(login_url='ridesharer:user_login')
+def search_rides_for_sharer(request):
+    if request.method == 'POST':
+        form = sharableOrderSearchCreateForm(request.POST)
+        if form.is_valid():
+            destination = form.cleaned_data['destination']
+            earleist_arrival_time = form.cleaned_data['earleist_arrival_time']
+            latetest_arrival_time = form.cleaned_data['latetest_arrival_time']
+            passengers_num = form.cleaned_data['passengers_num']
+            if earleist_arrival_time > latetest_arrival_time:
+                messages.warning(request,"earleist_arrival_time should be before latetest_arrival_time!")
+                form = sharableOrderSearchCreateForm()
+                context ={'form':form}
+                return  render(request, 'ridesharer/sharable_order_search.html',context)
+            if passengers_num <= 0:
+                messages.warning(request,"Passenger number should be positive !")
+                form = sharableOrderSearchCreateForm()
+                context ={'form':form}
+                return  render(request, 'ridesharer/sharable_order_search.html',context)
+            rides = Ride.objects.filter(~Q(owner = request.user)&Q(destination=destination)& Q(ride_status = RideStatus.OPEN)& Q(require_arrival_time__gte=earleist_arrival_time)& Q(require_arrival_time__lte=latetest_arrival_time))
+            context = {'rides':rides, 'user':request.user}
+            return render(request, 'ridesharer/sharable_ride_list.html', context)
+        else:
+            messages.warning(request,"Invalid form input!")
+    form = sharableOrderSearchCreateForm()
+    context ={'form':form}
+    return  render(request, 'ridesharer/sharable_order_search.html',context)

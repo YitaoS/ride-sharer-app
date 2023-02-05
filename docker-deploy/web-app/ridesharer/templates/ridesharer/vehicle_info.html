@@ -115,24 +115,23 @@
                       Submit
                     </button>
                     <br />
-                    <br />
-                    <button
-                      class="btn btn-outline-light btn-sm px-5"
-                      type="submit"
-                      name="Update vehicle"
-                    >
-                      <a
-                        href="{% url 'ridesharer:vehicle_delete' %}"
-                        class="nav-link"
-                        >remove vehicle</a
-                      >
-                    </button>
-                    <br />
                     {% for message in messages%}
                     <p id="messages">{{message}}</p>
                     {% endfor %}
                   </div>
                 </form>
+
+                <button
+                  class="btn btn-outline-light btn-sm px-5"
+                  type="submit"
+                  name="Update vehicle"
+                >
+                  <a
+                    href="{% url 'ridesharer:vehicle_delete' %}"
+                    class="nav-link"
+                    >remove vehicle</a
+                  >
+                </button>
               </div>
             </div>
           </div>

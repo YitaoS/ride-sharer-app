@@ -118,6 +118,17 @@
                     {% endfor %}
                   </div>
                 </form>
+                <button
+                  class="btn btn-outline-light btn-sm px-5"
+                  type="submit"
+                  name="Delete Order"
+                >
+                  <a
+                    href="{% url 'ridesharer:ride_delete' ride.id %}"
+                    class="nav-link"
+                    >Delete Order</a
+                  >
+                </button>
               </div>
             </div>
           </div>

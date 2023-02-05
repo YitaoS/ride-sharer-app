@@ -59,35 +59,14 @@
             <div class="card bg-dark text-white" style="border-radius: 1rem">
               <div class="card-body p-5 text-left">
                 <form method="POST" action="">
-                  {% csrf_token %}
+                  {% csrf_token%}
                   <div class="mb-md-3 mt-md-4 pb-5">
                     <h2 class="fw-bold mb-4 text-uppercase">Order your ride</h2>
                     <br />
-                    {% if owner == user %}
-                    <h2>Vehicle Information</h2>
-                    <br />
                     <p>
-                      <label for="id_driver">Driver:</label>
+                      <label for="id_destination">driver:</label>
                       {{driver}}
                     </p>
-                    <p>
-                      <label for="id_vehicle_type">Vehicle type:</label>
-                      {{vehicle_type}}
-                    </p>
-                    <p>
-                      <label for="id_license_number">license number:</label>
-                      {{license_number}}
-                    </p>
-                    <p>
-                      <label for="id_max_capacity">Max capacity: </label>
-                      {{max_capacity}}
-                    </p>
-                    <p>
-                      <label for="id_driver_special_info">Special info: </label>
-                      {{driver_special_info}}
-                    </p>
-                    {% endif %}
-                    <h2>Ride Information</h2>
                     <p>
                       <label for="id_require_arrival_time"
                         >Require arrival time:</label
@@ -118,9 +97,11 @@
                     </p>
 
                     <p>
-                      <label for="id_special_info">My special info:</label>
-                      {{my_special_info}}
+                      <label for="id_special_info">Special info:</label>
+                      {{special_info}}
                     </p>
+                    <br />
+
                     <!-- <div class="form-white mb-2">
                         <label class="form-label" for="typeNameX"></label>
                         <br />
@@ -161,14 +142,19 @@
                           class="form-control-lg"
                         />
                       </div> -->
-                    {% if driver == user%}
+                    {% if ride_status == 'open'%}
                     <button
                       class="btn btn-outline-light btn-lg px-5"
                       type="submit"
-                      name="Finish Order"
+                      name="Confirm order"
                     >
-                      Finish
+                      Confirm ride
                     </button>
+                    {% else %}
+                    <p>
+                      <label for="id_special_info">Special info:</label>
+                      {{ride_status}}
+                    </p>
                     {% endif %}
                   </div>
                 </form>
