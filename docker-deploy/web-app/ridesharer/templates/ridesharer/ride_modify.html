@@ -17,7 +17,7 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
       <div class="container">
-        <a href="#" class="navbar-brand">Order Ride</a>
+        <a href="#" class="navbar-brand">Modify Ride</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -31,6 +31,21 @@
             <li class="nav-item">
               <a href="{% url 'ridesharer:user_home' %}" class="nav-link"
                 >home</a
+              >
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'ridesharer:ride_list' %}" class="nav-link"
+                >your rides
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'ridesharer:joined_ride_list' %}" class="nav-link"
+                >joined rides
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'ridesharer:order_list' %}" class="nav-link"
+                >driver orders</a
               >
             </li>
             <li class="nav-item">
@@ -61,7 +76,9 @@
                 <form method="POST" action="">
                   {% csrf_token%}
                   <div class="mb-md-3 mt-md-4 pb-5">
-                    <h2 class="fw-bold mb-4 text-uppercase">Order your ride</h2>
+                    <h2 class="fw-bold mb-4 text-uppercase">
+                      Modify your ride
+                    </h2>
                     <br />
 
                     {{ form.as_p}}
@@ -118,17 +135,13 @@
                     {% endfor %}
                   </div>
                 </form>
-                <button
-                  class="btn btn-outline-light btn-sm px-5"
-                  type="submit"
-                  name="Delete Order"
-                >
+                <h2>
                   <a
                     href="{% url 'ridesharer:ride_delete' ride.id %}"
                     class="nav-link"
                     >Delete Order</a
                   >
-                </button>
+                </h2>
               </div>
             </div>
           </div>

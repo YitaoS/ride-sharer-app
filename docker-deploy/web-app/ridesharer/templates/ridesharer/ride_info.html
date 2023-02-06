@@ -17,7 +17,7 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
       <div class="container">
-        <a href="#" class="navbar-brand">Order Ride</a>
+        <a href="#" class="navbar-brand">Your Own Rides Order</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -31,6 +31,21 @@
             <li class="nav-item">
               <a href="{% url 'ridesharer:user_home' %}" class="nav-link"
                 >home</a
+              >
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'ridesharer:ride_list' %}" class="nav-link"
+                >your rides
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'ridesharer:joined_ride_list' %}" class="nav-link"
+                >joined rides
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'ridesharer:order_list' %}" class="nav-link"
+                >driver orders</a
               >
             </li>
             <li class="nav-item">
@@ -61,8 +76,8 @@
                 <form method="POST" action="">
                   {% csrf_token%}
                   <div class="mb-md-3 mt-md-4 pb-5">
-                    <h2 class="fw-bold mb-4 text-uppercase">Order your ride</h2>
-                    {{ name }} <br />
+                    <h2 class="fw-bold mb-4 text-uppercase">your ride list</h2>
+                    <br />
 
                     {% for ride in rides %}
                     <li>
@@ -70,49 +85,7 @@
                         >{{ ride }}</a
                       >
                     </li>
-                    {% endfor %}
-                    <!-- <div class="form-white mb-2">
-                        <label class="form-label" for="typeNameX"></label>
-                        <br />
-                        <input
-                          type="text"
-                          name="username"
-                          maxlength="150"
-                          autofocus=""
-                          required=""
-                          id="id_username"
-                          class="form-control-lg"
-                        />
-                      </div>
-  
-                      <div class="form-white mb-2">
-                        <label class="form-label" for="typeEmailX">Email</label>
-                        <br />
-                        <input
-                          type="email"
-                          name="email"
-                          maxlength="254"
-                          id="id_email"
-                          class="form-control-lg"
-                        />
-                      </div>
-  
-                      <div class="form-white mb-2">
-                        <label class="form-label" for="typePasswordX"
-                          >Password</label
-                        >
-                        <br />
-                        <input
-                          type="password"
-                          name="password1"
-                          autocomplete="new-password"
-                          required=""
-                          id="id_password1"
-                          class="form-control-lg"
-                        />
-                      </div> -->
-
-                    {% for message in messages%}
+                    {% endfor %} {% for message in messages%}
                     <p id="messages">{{ message }}</p>
                     {% endfor %}
                   </div>

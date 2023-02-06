@@ -17,7 +17,7 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
       <div class="container">
-        <a href="#" class="navbar-brand">Find Sharable Ride</a>
+        <a href="#" class="navbar-brand">Your Joined Rides</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -72,16 +72,23 @@
         <div class="d-flex justify-content-center align-items-center h-150">
           <div class="col-12 col-md-8 col-lg-6 col-xl-5">
             <div class="card bg-dark text-white" style="border-radius: 1rem">
-              <div class="card-body p-5 text-center">
+              <div class="card-body p-5 text-left">
                 <form method="POST" action="">
                   {% csrf_token%}
                   <div class="mb-md-3 mt-md-4 pb-5">
                     <h2 class="fw-bold mb-4 text-uppercase">
-                      Search a sharable ride now!
+                      Your joined ride list
                     </h2>
-                    {{name}} <br />
+                    {{ name }} <br />
 
-                    {{ form.as_p}}
+                    {% for ride in rides %}
+                    <li>
+                      <a
+                        href="{% url 'ridesharer:joined_ride_detail' ride.id %}"
+                        >{{ ride }}</a
+                      >
+                    </li>
+                    {% endfor %}
                     <!-- <div class="form-white mb-2">
                         <label class="form-label" for="typeNameX"></label>
                         <br />
@@ -123,15 +130,8 @@
                         />
                       </div> -->
 
-                    <button
-                      class="btn btn-outline-light btn-lg px-5"
-                      type="submit"
-                      name="Register Driver"
-                    >
-                      Submit
-                    </button>
                     {% for message in messages%}
-                    <p id="messages">{{message}}</p>
+                    <p id="messages">{{ message }}</p>
                     {% endfor %}
                   </div>
                 </form>

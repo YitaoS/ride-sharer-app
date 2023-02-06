@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
 from django.urls import reverse
 from django.http import HttpResponse,HttpResponseRedirect
 from django.utils import timezone
@@ -121,6 +123,10 @@ def ride_detail(request, ride_id):
             else:
                 messages.warning(request,"Invalid input !")
         #get
+        if ride.sharing_actions.all():
+            share_actions = ride.sharing_actions.all()
+            context ={'owner':owner,'share_actions':share_actions,'driver':"",'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'passengers':ride.passengers,'require_vehicle_type':ride.get_require_vehicle_type_display(),'allow_sharer':ride.allow_sharer,'special_info':ride.special_info,'ride_status':ride.get_ride_status_display(),'user':user}
+            return  render(request, 'ridesharer/ride_detail.html',context)
         form = updateRideForm(instance = ride)
         context ={'form':form, 'ride':ride}
         return render(request, 'ridesharer/ride_modify.html',context)
@@ -137,9 +143,13 @@ def ride_detail(request, ride_id):
     license_number = ride.driver.vehicle.license_number
     max_capacity = ride.driver.vehicle.max_capacity
     special_info = ride.driver.vehicle.special_info
-    context ={'owner':owner,'driver':driver,'require_arrival_time':require_arrival_time,'destination':destination,'passengers':passengers,'require_vehicle_type':require_vehicle_type,'allow_sharer':allow_sharer,'my_special_info':ride.special_info,'vehicle_type': vehicle_type,'license_number': license_number,'max_capacity': max_capacity,'driver_special_info': special_info, 'user':user}
-    return  render(request, 'ridesharer/ride_detail.html',context)
-
+    try:
+        share_actions = ride.sharing_actions.all()
+        context ={'owner':owner,'share_actions':share_actions,'driver':driver,'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'passengers':ride.passengers,'require_vehicle_type':ride.get_require_vehicle_type_display(),'allow_sharer':ride.allow_sharer,'special_info':ride.special_info,'ride_status':ride.get_ride_status_display(),'vehicle_type': vehicle_type,'license_number': license_number,'max_capacity': max_capacity,'driver_special_info': special_info,'user':user}
+        return  render(request, 'ridesharer/ride_detail.html',context)
+    except AttributeError:
+        context ={'owner':owner,'driver':driver,'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'passengers':ride.passengers,'require_vehicle_type':ride.get_require_vehicle_type_display(),'allow_sharer':ride.allow_sharer,'special_info':ride.special_info,'ride_status':ride.get_ride_status_display(),'vehicle_type': vehicle_type,'license_number': license_number,'max_capacity': max_capacity,'driver_special_info': special_info,'user':user}
+        return  render(request, 'ridesharer/ride_detail.html',context)
 # def user_update(request):
 #     if request.method == 'POST':
 #         form = updateUserForm(request.POST, instance = request.user)
@@ -162,6 +172,43 @@ def ride_list(request):
     }
     return render(request, 'ridesharer/ride_info.html', context)
 
+@login_required(login_url='ridesharer:user_login')
+def joined_ride_list(request):
+    allActions = request.user.share_actions.all()
+    rides = []
+    for action in allActions:
+        if action.shared_ride.ride_status != 'F':
+            rides.append(action.shared_ride)
+    context = {
+        'rides': rides,
+    }
+    return render(request, 'ridesharer/joined_ride_list.html', context)
+
+def joined_ride_detail(request, ride_id):
+    ride = Ride.objects.filter(id=ride_id)[0]
+    driver = "To be assigned"
+    if request.method == 'POST':
+        allActions = request.user.share_actions.all()
+        for action in allActions:
+            if action.shared_ride.id == ride_id:
+                action.shared_ride.passengers -= action.sharer_num
+                action.shared_ride.save()
+                action.delete()
+            return HttpResponseRedirect(reverse('ridesharer:joined_ride_list'))
+    share_actions = ride.sharing_actions.all()
+    ride_status = ride.get_ride_status_display()
+    if ride_status != 'confirmed':
+        context ={'ride_status':ride_status,'share_actions':share_actions,'driver':driver,'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'passengers':ride.passengers,'require_vehicle_type':ride.get_require_vehicle_type,'allow_sharer':ride.allow_sharer,'special_info':ride.special_info,'ride_status':ride_status}
+        return  render(request, 'ridesharer/joined_ride_detail.html',context)
+    driver = ride.driver.username
+    vehicle_type = ride.driver.vehicle.get_vehicle_type_display()
+    license_number = ride.driver.vehicle.license_number
+    max_capacity = ride.driver.vehicle.max_capacity
+    special_info = ride.driver.vehicle.special_info
+    context ={'ride_status':ride_status,'share_actions':share_actions,'driver':driver,'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'passengers':ride.passengers,'require_vehicle_type':ride.get_require_vehicle_type_display(),'allow_sharer':ride.allow_sharer,'my_special_info':ride.special_info,'vehicle_type': vehicle_type,'license_number': license_number,'max_capacity': max_capacity,'driver_special_info': special_info}
+    return  render(request, 'ridesharer/joined_ride_detail.html',context)
+
+@login_required(login_url='ridesharer:user_login')
 def order_list(request):
     try: 
         request.user.vehicle
@@ -215,6 +262,20 @@ def ride_confirm(request,ride_id):
         ride.driver = request.user
         ride.ride_status = 'C'
         ride.save()
+        receivers = []
+        rider_email = get_object_or_404(User, id=ride.owner.id).email
+        receivers.append(rider_email)
+        allActions = ShareAction.objects.filter(shared_ride=ride)
+        for action in allActions:
+            sharer_email = action.sharer.email
+            receivers.append(sharer_email)
+        send_mail(
+            'Driver Comfirmed Your Order',
+            'Your ride order to' + ride.destination + 'is confirmed!',
+            'chensuo568@gmail.com',
+             receivers,
+            fail_silently=False,
+        )
         pass
     if ride.driver == None:
         driver = "To be assigned"
@@ -224,16 +285,23 @@ def ride_confirm(request,ride_id):
     return  render(request, 'ridesharer/ride_confirm.html',context)
 
 @login_required(login_url='ridesharer:user_login')
-def confirm_join(request,ride_id,passengers,passengers_num):
+def confirm_join(request,ride_id,passengers_num):
     ride = Ride.objects.filter(id=ride_id)[0]
+    driver = "To be assigned"
     if request.method == 'POST':
-        ride.sharer.add(request.user)
+        share_action = ShareAction(sharer=request.user,shared_ride=ride,sharer_num=passengers_num)
+        share_action.save()
+        request.user.share_actions.add(share_action)
         ride.passengers += passengers_num
         ride.save()
-        pass
-    driver = "To be assigned"
-    context ={'driver':driver,'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'passengers':ride.passengers,'require_vehicle_type':ride.get_require_vehicle_type_display(),'allow_sharer':ride.allow_sharer,'special_info':ride.special_info,'ride_status':ride.get_ride_status_display()}
-    return  render(request, 'ridesharer/ride_confirm.html',context)
+        return HttpResponseRedirect(reverse('ridesharer:joined_ride_list'))
+    try:
+        share_actions = ride.sharing_actions.all()
+        context ={'share_actions':share_actions,'driver':driver,'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'passengers':ride.passengers,'require_vehicle_type':ride.get_require_vehicle_type_display(),'allow_sharer':ride.allow_sharer,'special_info':ride.special_info,'ride_status':ride.get_ride_status_display()}
+        return  render(request, 'ridesharer/ride_join.html',context)
+    except AttributeError:
+        context ={'driver':driver,'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'passengers':ride.passengers,'require_vehicle_type':ride.get_require_vehicle_type_display(),'allow_sharer':ride.allow_sharer,'special_info':ride.special_info,'ride_status':ride.get_ride_status_display()}
+        return  render(request, 'ridesharer/ride_join.html',context)
 
 @login_required(login_url='ridesharer:user_login')
 def search_rides_for_driver(request):
@@ -265,8 +333,17 @@ def search_rides_for_sharer(request):
                 form = sharableOrderSearchCreateForm()
                 context ={'form':form}
                 return  render(request, 'ridesharer/sharable_order_search.html',context)
-            rides = Ride.objects.filter(~Q(owner = request.user)&Q(destination=destination)& Q(ride_status = RideStatus.OPEN)& Q(require_arrival_time__gte=earleist_arrival_time)& Q(require_arrival_time__lte=latetest_arrival_time))
-            context = {'rides':rides, 'user':request.user}
+            Allrides = Ride.objects.filter(~Q(owner = request.user)&Q(destination=destination)& Q(ride_status = RideStatus.OPEN)& Q(require_arrival_time__gte=earleist_arrival_time)& Q(require_arrival_time__lte=latetest_arrival_time)& Q(allow_sharer=True))
+            rides = []
+            for ride in Allrides:
+                contain = False
+                for action in request.user.share_actions.all():
+                    if action.shared_ride == ride:
+                        contain = True
+                        break
+                if contain == False:
+                    rides.append(ride)
+            context = {'rides':rides, 'user':request.user,'passengers_num':passengers_num}
             return render(request, 'ridesharer/sharable_ride_list.html', context)
         else:
             messages.warning(request,"Invalid form input!")

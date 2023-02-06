@@ -34,6 +34,21 @@
               >
             </li>
             <li class="nav-item">
+              <a href="{% url 'ridesharer:ride_list' %}" class="nav-link"
+                >your rides
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'ridesharer:joined_ride_list' %}" class="nav-link"
+                >joined rides
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'ridesharer:order_list' %}" class="nav-link"
+                >driver orders</a
+              >
+            </li>
+            <li class="nav-item">
               <a href="{% url 'ridesharer:user_update' %}" class="nav-link"
                 >user info</a
               >
@@ -66,7 +81,8 @@
 
                     {% for ride in rides %}
                     <li>
-                      <a href="{% url 'ridesharer:ride_detail' ride.id %}"
+                      <a
+                        href="{% url 'ridesharer:confirm_join' ride_id=ride.id passengers_num=passengers_num%}"
                         >{{ ride }}</a
                       >
                     </li>

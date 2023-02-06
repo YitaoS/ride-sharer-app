@@ -17,7 +17,7 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
       <div class="container">
-        <a href="#" class="navbar-brand">Order Ride</a>
+        <a href="#" class="navbar-brand">Ride Details</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -31,6 +31,21 @@
             <li class="nav-item">
               <a href="{% url 'ridesharer:user_home' %}" class="nav-link"
                 >home</a
+              >
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'ridesharer:ride_list' %}" class="nav-link"
+                >your rides
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'ridesharer:joined_ride_list' %}" class="nav-link"
+                >joined rides
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'ridesharer:order_list' %}" class="nav-link"
+                >driver orders</a
               >
             </li>
             <li class="nav-item">
@@ -61,9 +76,9 @@
                 <form method="POST" action="">
                   {% csrf_token %}
                   <div class="mb-md-3 mt-md-4 pb-5">
-                    <h2 class="fw-bold mb-4 text-uppercase">Order your ride</h2>
+                    <h2 class="fw-bold mb-4 text-uppercase">Ride details</h2>
                     <br />
-                    {% if owner == user %}
+                    {% if owner == user and ride_status == 'confirmed'%}
                     <h2>Vehicle Information</h2>
                     <br />
                     <p>
@@ -118,8 +133,8 @@
                     </p>
 
                     <p>
-                      <label for="id_special_info">My special info:</label>
-                      {{my_special_info}}
+                      <label for="id_special_info">Owner's special info:</label>
+                      {{special_info}}
                     </p>
                     <!-- <div class="form-white mb-2">
                         <label class="form-label" for="typeNameX"></label>
@@ -161,7 +176,9 @@
                           class="form-control-lg"
                         />
                       </div> -->
-                    {% if driver == user%}
+                    {% for share_action in share_actions %}
+                    <li>{{ share_action}}</li>
+                    {% endfor %} {% if driver == user%}
                     <button
                       class="btn btn-outline-light btn-lg px-5"
                       type="submit"

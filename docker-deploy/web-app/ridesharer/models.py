@@ -24,12 +24,6 @@ class Vehicle(models.Model):
     def get_absolute_url(self):
         return reverse('ridesharer:vehicle_info')
 
-class ShareAction(models.Model):
-    id = models.AutoField(primary_key = True)
-    sharer = models.ForeignKey(User, on_delete=models.CASCADE,primary_key=False, related_name='share_actions')
-    shared_ride = models.ForeignKey(User, on_delete=models.CASCADE,primary_key=False, related_name='share_actions')
-    sharer_num = models.PositiveIntegerField(default = 1)
-
 class RideStatus(models.TextChoices):
     OPEN = 'O', 'open'
     CONFIRMED = 'C', 'confirmed'
@@ -45,10 +39,17 @@ class Ride(models.Model):
     destination = models.CharField(max_length=200)
     passengers = models.PositiveIntegerField()
     allow_sharer = models.BooleanField(default=False)
-    sharer = models.ManyToManyField(User, related_name='sharer_ride')
     special_info = models.CharField('special requirement',max_length=200,blank=True)
     ride_status= models.CharField(max_length=1, choices=RideStatus.choices, default=RideStatus.OPEN)
     def get_absolute_url(self):
         return reverse('ridesharer:ride_list')
     def __str__(self):
-        return "Owner: "+ self.owner.username+"Arrival time: " + str(self.require_arrival_time) + " dest: " + self.destination + " status: " + self.get_ride_status_display()
+        return "Owner: "+ self.owner.username+" Arrival time: " + str(self.require_arrival_time) + " dest: " + self.destination + " status: " + self.get_ride_status_display()
+
+class ShareAction(models.Model):
+    id = models.AutoField(primary_key = True)
+    sharer = models.ForeignKey(User, on_delete=models.CASCADE,primary_key=False, related_name='share_actions')
+    shared_ride = models.ForeignKey(Ride, on_delete=models.CASCADE,primary_key=False, related_name='sharing_actions')
+    sharer_num = models.PositiveIntegerField(default = 1)
+    def __str__(self):
+        return "sharer: "+ self.sharer.username+" takes totally " + str(self.sharer_num) + " passengers to join the ride"

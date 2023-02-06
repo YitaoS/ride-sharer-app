@@ -17,7 +17,7 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
       <div class="container">
-        <a href="#" class="navbar-brand">Find Sharable Ride</a>
+        <a href="#" class="navbar-brand">Order Ride</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -72,16 +72,51 @@
         <div class="d-flex justify-content-center align-items-center h-150">
           <div class="col-12 col-md-8 col-lg-6 col-xl-5">
             <div class="card bg-dark text-white" style="border-radius: 1rem">
-              <div class="card-body p-5 text-center">
+              <div class="card-body p-5 text-left">
                 <form method="POST" action="">
                   {% csrf_token%}
                   <div class="mb-md-3 mt-md-4 pb-5">
-                    <h2 class="fw-bold mb-4 text-uppercase">
-                      Search a sharable ride now!
-                    </h2>
-                    {{name}} <br />
+                    <h2 class="fw-bold mb-4 text-uppercase">Order your ride</h2>
+                    <br />
+                    <p>
+                      <label for="id_destination">driver:</label>
+                      {{driver}}
+                    </p>
+                    <p>
+                      <label for="id_require_arrival_time"
+                        >Require arrival time:</label
+                      >
+                      {{require_arrival_time}}
+                    </p>
 
-                    {{ form.as_p}}
+                    <p>
+                      <label for="id_destination">Destination:</label>
+                      {{destination}}
+                    </p>
+
+                    <p>
+                      <label for="id_passengers">passengers:</label>
+                      {{passengers}}
+                    </p>
+
+                    <p>
+                      <label for="id_require_vehicle_type"
+                        >Require vehicle type:</label
+                      >
+                      {{require_vehicle_type}}
+                    </p>
+
+                    <p>
+                      <label for="id_allow_sharer">Allow sharer:</label>
+                      {{allow_sharer}}
+                    </p>
+
+                    <p>
+                      <label for="id_special_info">Special info:</label>
+                      {{special_info}}
+                    </p>
+                    <br />
+
                     <!-- <div class="form-white mb-2">
                         <label class="form-label" for="typeNameX"></label>
                         <br />
@@ -122,17 +157,16 @@
                           class="form-control-lg"
                         />
                       </div> -->
-
+                    {{ride}} {% for share_action in share_actions %}
+                    <li>{{ share_action}}</li>
+                    {% endfor %}
                     <button
                       class="btn btn-outline-light btn-lg px-5"
                       type="submit"
-                      name="Register Driver"
+                      name="Confirm order"
                     >
-                      Submit
+                      Confirm join ride
                     </button>
-                    {% for message in messages%}
-                    <p id="messages">{{message}}</p>
-                    {% endfor %}
                   </div>
                 </form>
               </div>
