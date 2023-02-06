@@ -1,0 +1,30 @@
+Danger log
+
+01/24/2023
+Danger: security problem that rides can be created even without logging in. 
+Solution: add a line of @login_required(login_url='ridesharer:user_login') upon every function to require logging in before any operations like registering as a driver, updating driver information, creating rides and so on.
+
+01/26/2023
+Danger: when the user has no specific vehicle type requirement or/and special informaion requirement, driver cannot see this order even if other requirements meet its vehicle information.
+Solution: add a condition in the filer function to include the condition when vehicle type requirement or/and special information requirement left empty.
+
+01/27/2023
+Danger: driver can search for and confirm the order create by himself/herself.
+Solution: add a condition ~Q(id=driver_id).
+
+01/29/2023
+Danger: operator of less than or equal to cannot be used in filter function
+Solution：traverse all sharers to calculate the total number of passengers. Judge whether this order can be taken by the driver by comparing the number of total passengers with the maximum capacity of the vehicle 
+
+
+02/04/2023
+Danger: email cannot be sent due to authentication failure.
+Solution: enable two factors authentication of the email address that is used to send the emails.
+
+
+02/05/2023
+Danger: when a user has registered as a driver and confirm an order. If the driver now delete its identity as a driver. His/her order cannot be modified to cancel.
+Solution: add a condition to ensure that the user can only delete its identity as a driver when his/her order has been cancelled or he/she has not confirmed any order yet.
+
+02/06/2023
+Danger: what if there are too many users that we run out of memory
