@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-hbqc-9@4tnhn%p+4&i(6nvnl!+w47z3vb99bkhu0jr%x5bvyds
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['vcm-30927.vm.duke.edu', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['web','vcm-30927.vm.duke.edu', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -85,11 +85,11 @@ WSGI_APPLICATION = 'project1.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'db_ridesharer',
-        'USER': 'ys386',
-        'PASSWORD': '@Syt991010',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
 

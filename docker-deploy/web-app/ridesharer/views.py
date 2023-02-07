@@ -198,7 +198,7 @@ def joined_ride_detail(request, ride_id):
     share_actions = ride.sharing_actions.all()
     ride_status = ride.get_ride_status_display()
     if ride_status != 'confirmed':
-        context ={'ride_status':ride_status,'share_actions':share_actions,'driver':driver,'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'passengers':ride.passengers,'require_vehicle_type':ride.get_require_vehicle_type,'allow_sharer':ride.allow_sharer,'special_info':ride.special_info,'ride_status':ride_status}
+        context ={'ride_status':ride_status,'share_actions':share_actions,'driver':driver,'require_arrival_time':ride.require_arrival_time,'destination':ride.destination,'passengers':ride.passengers,'require_vehicle_type':ride.get_require_vehicle_type_display,'allow_sharer':ride.allow_sharer,'special_info':ride.special_info,'ride_status':ride_status}
         return  render(request, 'ridesharer/joined_ride_detail.html',context)
     driver = ride.driver.username
     vehicle_type = ride.driver.vehicle.get_vehicle_type_display()
@@ -307,7 +307,17 @@ def confirm_join(request,ride_id,passengers_num):
 def search_rides_for_driver(request):
     try:        
         vehicle_profile = request.user.vehicle# access all available open rides for driver
-        rides = Ride.objects.filter(Q(passengers__lte=vehicle_profile.max_capacity)& ~Q(owner = request.user)& Q(ride_status = RideStatus.OPEN)& (Q(require_vehicle_type=vehicle_profile.vehicle_type) | Q(require_vehicle_type=''))& (Q(special_info=vehicle_profile.special_info)| Q(special_info='')))
+        allRides = Ride.objects.filter(Q(passengers__lte=vehicle_profile.max_capacity)& ~Q(owner = request.user)& Q(ride_status = RideStatus.OPEN)& (Q(require_vehicle_type=vehicle_profile.vehicle_type) | Q(require_vehicle_type=''))& (Q(special_info=vehicle_profile.special_info)| Q(special_info='')))
+        rides = []
+        for ride in allRides:
+            isSharer = False
+            for action in request.user.share_actions.all():
+                if action.shared_ride == ride:
+                    isSharer = True
+                    break
+            if not isSharer:
+                rides.append(ride)
+                    
         context = {'rides':rides}
         return render(request, 'ridesharer/driver_ride_search.html', context)
     except AttributeError:
