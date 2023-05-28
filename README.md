@@ -3,9 +3,13 @@ This GitHub repository contains a course project that is a web application built
 
 ### start
 
-First, you need to enter ```chmod o+x docker-deploy/web-app/initserver.sh
-chmod o+x docker-deploy/web-app/runserver.sh
-chmod o+x docker-deploy/web-app/startserver.sh``` in your shell
+First, you need to enter
+
+```chmod o+x docker-deploy/web-app/initserver.sh```
+
+```chmod o+x docker-deploy/web-app/runserver.sh```
+
+```chmod o+x docker-deploy/web-app/startserver.sh``` in your shell
 
 then enter
 ```cd docker-delpoy```
