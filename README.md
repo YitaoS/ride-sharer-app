@@ -46,5 +46,5 @@ then enter
 │        ├── tests.py
 │        └── __init__.py
 │   
-└── nginx/config/```
+└── nginx/config/
 
